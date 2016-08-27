@@ -41,11 +41,10 @@ void test_graphics_1(int w, int h, int n, char *s)
 
 	float radius = 200;
 
+	for (i = 0; i < n; i++) {
 	Start(w, h);
 	Background(0, 0, 0);
 	Translate(x, y);
-	for (i = 0; i < n; i++) {
-//		vgClear(0, 0, w, h);
 
 		StrokeWidth(3.0);
 
@@ -58,6 +57,7 @@ void test_graphics_1(int w, int h, int n, char *s)
 		Rotate(deg);
 		
 		End();
+		sleep(1);
 	}
 	End();
 }
