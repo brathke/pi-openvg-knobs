@@ -9,4 +9,5 @@ all:
 		-I/opt/vc/include/interface/vcos/pthreads \
 		$(OUTPUT).c \
 		-o $(OUTPUT) \
-		-lshapes
+		-lshapes \
+		-lm

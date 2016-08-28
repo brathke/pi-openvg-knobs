@@ -5,51 +5,79 @@
 #include "VG/vgu.h"
 #include "fontinfo.h"
 #include "shapes.h"
+#include <signal.h>
+#include <math.h>
 
-void test_graphics_1(int w, int h, int n, char *s)
-{	
-	float radius = 200;
-	float strokewidth = 3.0;
-	float strokecolor[4] = {color_blue, 1};
+void draw(int width, int height)
+{
+    // remote control items
+    static int frameNumber = 0;
+    frameNumber++;
+    
+    // clear window
+    Start(width, height);
 
-	VGfloat deg = -1 * 360.0 / n;
-	VGfloat x = radius/2, y = h / 2;
-	int i;
+    // set fixed user configurables
+    int numKnobs = 3;
+    int radius = width/numKnobs;
+    
+    // set fixed colors, widths
+    float fillColor[4] = {color_blue, 255};
+    float strokeColor[4] = {color_white, 255};
+    float backgroundColor[4] = {color_black, 255};
+    Background(color_black);
+    setfill(backgroundColor);
+    setstroke(strokeColor);
+    StrokeWidth(radius/75);
 
-	Start(w, h);
-	Translate(x, y);
-	int knobIndex;
-	const int numKnobs = 6;
-	for (knobIndex = 0; knobIndex<numKnobs; knobIndex++) {
-		for (i = 0; i < n; i++) {
-			Background(0, 0, 0);
-			StrokeWidth(strokewidth);
-			setstroke(strokecolor);
-			CircleOutline(0, 0, radius);
-			Line(0, 0, radius/2, 0);
-			Rotate(deg);			
-			End();
-		}
-		Translate(radius,0);
-	}
-	End();
+    // draw knobs
+    while (numKnobs--) {
+        float x = radius/2+numKnobs*radius;
+        float y = height*1/2;
+        
+        // outlines
+        if (numKnobs == 0) {
+            setfill(fillColor);
+            Circle(x, y, radius);
+            setfill(backgroundColor);
+        }
+        else {
+            Circle(x, y, radius);
+        }
+
+        // indicators
+        static float angle = 0;
+        angle -= .01;
+        float x2 = x + radius/2 * cos(angle*2*3.14);
+        float y2 = y + radius/2 * sin(angle*2*3.14);
+        Line(x, y, x2, y2);
+    }
+    
+    // swap buffers, render to screen
+    End();
 }
 
-int main() {
-	int width, height;
-	char s[3];
-	
-	init(&width, &height);                  // Graphics initialization
+void sig_handler(int sig)
+{
+    finish();
+    exit(1);
+}
 
-	Start(width, height);
-#if 1
-	test_graphics_1(width, height, 32, "what");
-#endif
-	End();
-	
-	//sleep(5);
-	//fgets(s, 2, stdin);                     // look at the pic, end with [RETURN]
+int main(int argc, char** argv)
+{
+    signal(SIGINT, sig_handler);
+    
+    int width, height;
+    init(&width, &height);
 
-	finish();                               // Graphics cleanup
-	exit(0);
+    int numIterations = 100;
+    while (--numIterations) {
+        printf("%i left to do\n", numIterations);
+        draw(width, height);
+        sleep(0);
+    }
+
+    sleep(1);
+    finish();    
+    exit(0);
 }
